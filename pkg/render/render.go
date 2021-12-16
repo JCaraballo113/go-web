@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go-web/pkg/config"
+	"go-web/pkg/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,7 +20,7 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	// get the template cache for the app config
 	var tc map[string]*template.Template
 
@@ -36,7 +37,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 	buf := new(bytes.Buffer)
 
-	_ = t.Execute(buf, nil)
+	_ = t.Execute(buf, td)
 
 	_, err := buf.WriteTo(w)
 
