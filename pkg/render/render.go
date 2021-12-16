@@ -3,6 +3,7 @@ package render
 import (
 	"bytes"
 	"fmt"
+	"go-web/pkg/config"
 	"html/template"
 	"log"
 	"net/http"
@@ -11,13 +12,22 @@ import (
 
 var functions = template.FuncMap{}
 
+var app *config.AppConfig
+
+// NewTemplates sets the config for the template package
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
-	tc, err := CreateTemplateCache()
+	// get the template cache for the app config
+	var tc map[string]*template.Template
 
-	if err != nil {
-		log.Fatal(err)
+	if app.UseCache {
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
 	}
-
 	t, ok := tc[tmpl]
 
 	if !ok {
@@ -28,7 +38,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 
 	_ = t.Execute(buf, nil)
 
-	_, err = buf.WriteTo(w)
+	_, err := buf.WriteTo(w)
 
 	if err != nil {
 		fmt.Println("Error parsing html",err)
